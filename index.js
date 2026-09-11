@@ -29,13 +29,17 @@ app.use(cors({
 }));
 
 app.use(express.json());
-// 2. CHÈN THÊM ĐOẠN NÀY: Xử lý triệt để Preflight Request (OPTIONS) cho Vercel
-app.options('*', (req, res) => {
+// CHÈN ĐOẠN NÀY VÀO: Lớp bọc lót trả trạng thái OK (200) cho phương thức OPTIONS
+app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "https://laihoangdo.github.io");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
-    res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version");
+    res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization");
     res.setHeader("Access-Control-Allow-Credentials", "true");
-    return res.status(200).end(); // Trả về trạng thái HTTP OK (200) ngay lập tức
+    
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end(); // Ép buộc trả về HTTP OK (200) ngay lập tức
+    }
+    next();
 });
 
 // Kết nối với Supabase qua biến môi trường (Sẽ cấu hình trên Vercel Dashboard)
